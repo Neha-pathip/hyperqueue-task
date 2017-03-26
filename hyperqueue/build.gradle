@@ -1,0 +1,42 @@
+apply plugin: 'java'
+apply plugin: 'war'
+apply from: 'https://raw.github.com/akhikhl/gretty/master/pluginScripts/gretty.plugin'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+compileJava.options.encoding = 'UTF-8'
+
+
+repositories {
+   jcenter()
+}
+
+gretty {
+  httpsPort = 4430
+  debugPort = 5005
+  debugSuspend = false
+  httpEnabled = false
+  httpsEnabled = true
+  contextPath = '/'
+  initParameter("org.eclipse.jetty.servlet.Default.dirAllowed", "false")
+}
+
+dependencies {
+    // The production code uses Guava
+    
+    compile 'ch.qos.logback:logback-classic:1.2.2'
+    
+    compile 'ch.qos.logback:logback-core:1.2.2'
+    
+    compile 'org.glassfish.jersey.containers:jersey-container-servlet:2.25.1'
+    
+    compile 'org.glassfish.jersey.containers:jersey-container-jetty-http:2.25.1'
+    
+    compile 'com.fasterxml.jackson.datatype:jackson-datatype-joda:2.8.4'
+    
+    compile 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.8.4'
+    
+    // Use JUnit test framework
+    testCompile 'junit:junit:4.12'
+}
+

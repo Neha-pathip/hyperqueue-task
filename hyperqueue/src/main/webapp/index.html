@@ -1,0 +1,110 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <style>
+        .created {
+            color: green
+        }
+        
+        .uniqueId {
+            color: red
+        }
+        
+        .message {
+            color: black
+        }
+    </style>
+</head>
+
+<body>
+    <script type="text/javascript">
+        var baseUrl = "https://localhost:4430/broker/"
+
+        function getXmlHttpRequest() {
+            try {
+                // Firefox, Opera 8.0+, Safari
+                return new XMLHttpRequest();
+            }
+            catch (e) {
+                // Internet Explorer
+                try {
+                    return new ActiveXObject("Msxml2.XMLHTTP");
+                }
+                catch (e) {
+                    try {
+                        return new ActiveXObject("Microsoft.XMLHTTP");
+                    }
+                    catch (e) {
+                        alert("Your browser does not support AJAX!");
+                        return null;
+                    }
+                }
+            }
+        }
+
+        function getNextMessage(topic, sessionid) {
+            var xmlHttp = getXmlHttpRequest();
+            xmlHttp.onreadystatechange = function () {
+                if (xmlHttp.readyState == 4) {
+                    document.getElementById("output").innerHTML = xmlHttp.responseText + ', Session ID:' + xmlHttp.getResponseHeader("SessionID");
+                }
+            }
+            xmlHttp.open("GET", baseUrl + topic, true);
+            if (sessionid) {
+                xmlHttp.setRequestHeader("SessionID", sessionid);
+            }
+            xmlHttp.send(null);
+        }
+
+        function parseResponseHeaders(headerStr) {
+            var headers = {};
+            if (!headerStr) {
+                return headers;
+            }
+            var headerPairs = headerStr.split('\u000d\u000a');
+            for (var i = 0; i < headerPairs.length; i++) {
+                var headerPair = headerPairs[i];
+                // Can't use split() here because it does the wrong thing
+                // if the header value has the string ": " in it.
+                var index = headerPair.indexOf('\u003a\u0020');
+                if (index > 0) {
+                    var key = headerPair.substring(0, index);
+                    var val = headerPair.substring(index + 2);
+                    headers[key] = val;
+                }
+            }
+            return headers;
+        }
+
+        function addMessage(topic, message) {
+            var xmlHttp = getXmlHttpRequest();
+            xmlHttp.onreadystatechange = function () {
+                if (xmlHttp.readyState == 4) {
+                    document.getElementById("output").innerHTML = xmlHttp.responseText;
+                }
+            }
+            xmlHttp.open("POST", baseUrl + topic, true);
+            xmlHttp.send(message);
+        }
+    </script>
+    <h1>HyperQueue sample</h1>
+    <form name="form1"> Add Message:
+        <input type="text" name="messageTopic" />
+        <input type="text" name="messageText" />
+        <button type="button" name="ADD" onclick="addMessage(document.form1.messageTopic.value, document.form1.messageText.value)">ADD MESSAGE</button>
+    </form>
+    <br/>
+    <form name="form2"> Get Next Message of topic :
+        <input type="text" name="messageTopic" />
+        <input type="text" name="sessionid" />
+        <button type="button" name="GET" onclick="getNextMessage(document.form2.messageTopic.value,document.form2.sessionid.value)">Get next message</button>
+    </form>
+    <div id="query" style="font-weight: bold"></div>
+    <h3>result</h3>
+    <div id="output" style="border: 1px solid black; color: black; height: 18em; width: 100%"></div>
+</body>
+
+</html>
